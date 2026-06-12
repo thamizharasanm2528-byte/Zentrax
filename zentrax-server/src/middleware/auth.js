@@ -1,8 +1,11 @@
 const admin = require('firebase-admin');
-const serviceAccount = require('../../serviceAccountKey.json');
 
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount)
+    credential: admin.credential.cert({
+        projectId: process.env.FIREBASE_PROJECT_ID,
+        clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+        privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+    })
 });
 
 const db = admin.firestore();
@@ -49,8 +52,8 @@ const verifyToken = async (req, res, next) => {
 
             if (!isMentor) {
                 console.warn(`[Auth] Blocked unauthorized email domain: ${email}`);
-                return res.status(403).json({ 
-                    error: 'Only college emails (@rajalakshmi.edu.in) allowed' 
+                return res.status(403).json({
+                    error: 'Only college emails (@rajalakshmi.edu.in) allowed'
                 });
             }
         }
@@ -87,7 +90,7 @@ const requireRole = (role) => {
                 const defaultRole = 'student';
                 const email = (req.user.email || '').toLowerCase();
                 console.log(`Auto-creating user doc for ${uid} with role '${defaultRole}'`);
-                
+
                 // Feature 5 Cleanup: Remove level, points, badges
                 await db.collection('users').doc(uid).set({
                     uid,
@@ -97,7 +100,7 @@ const requireRole = (role) => {
                     skills: [],
                     createdAt: new Date().toISOString()
                 });
-                
+
                 setCachedRole(uid, defaultRole);
                 if (defaultRole !== role) {
                     return res.status(403).json({ error: `Access denied: requires '${role}' role` });
