@@ -32,8 +32,10 @@ function generateCommitMessage(statusLines) {
     const renames = [];
 
     statusLines.forEach(line => {
-        const type = line.slice(0, 2).trim();
-        const file = line.slice(3).replace(/"/g, '');
+        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
+        if (!match) return;
+        const type = match[1].trim();
+        const file = match[2].replace(/"/g, '');
         const baseName = path.basename(file);
 
         if (type === 'A' || type === '??') {
@@ -75,7 +77,8 @@ function syncChanges() {
     
     // Filter out changes to git-watcher.js, .gitignore or .git
     const validLines = lines.filter(line => {
-        const file = line.slice(3);
+        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
+        const file = match ? match[2] : line.slice(3);
         return !file.includes('git-watcher.js') && !file.includes('.git/');
     });
 
@@ -84,7 +87,10 @@ function syncChanges() {
     }
 
     console.log(`\n[${new Date().toLocaleTimeString()}] Changes detected in:`);
-    const fileNames = validLines.map(line => line.slice(3));
+    const fileNames = validLines.map(line => {
+        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
+        return match ? match[2].replace(/"/g, '') : line.slice(3);
+    });
     fileNames.forEach(f => console.log(`  - ${f}`));
 
     // 1. Git Add
