@@ -32,10 +32,10 @@ function generateCommitMessage(statusLines) {
     const renames = [];
 
     statusLines.forEach(line => {
-        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
+        const match = line.match(/^([ ADMRU?]{1,2})\s+(.+)$/);
         if (!match) return;
         const type = match[1].trim();
-        const file = match[2].replace(/"/g, '');
+        const file = match[2].trim().replace(/"/g, '');
         const baseName = path.basename(file);
 
         if (type === 'A' || type === '??') {
@@ -75,11 +75,11 @@ function syncChanges() {
 
     const lines = statusResult.output.split('\n').filter(line => line.trim().length > 0);
     
-    // Filter out changes to git-watcher.js, .gitignore or .git
+    // Filter out changes to git-watcher.js, test-msg.js, .gitignore or .git
     const validLines = lines.filter(line => {
-        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
-        const file = match ? match[2] : line.slice(3);
-        return !file.includes('git-watcher.js') && !file.includes('.git/');
+        const match = line.match(/^([ ADMRU?]{1,2})\s+(.+)$/);
+        const file = match ? match[2].trim() : line.slice(2).trim();
+        return !file.includes('git-watcher.js') && !file.includes('test-msg.js') && !file.includes('.git/');
     });
 
     if (validLines.length === 0) {
@@ -88,8 +88,8 @@ function syncChanges() {
 
     console.log(`\n[${new Date().toLocaleTimeString()}] Changes detected in:`);
     const fileNames = validLines.map(line => {
-        const match = line.match(/^([ ADMRU?]{2})\s+(.+)$/);
-        return match ? match[2].replace(/"/g, '') : line.slice(3);
+        const match = line.match(/^([ ADMRU?]{1,2})\s+(.+)$/);
+        return match ? match[2].trim().replace(/"/g, '') : line.slice(2).trim();
     });
     fileNames.forEach(f => console.log(`  - ${f}`));
 
@@ -157,7 +157,8 @@ try {
                           filename.includes('.vercel') ||
                           filename.includes('.git') ||
                           filename.includes('.env') ||
-                          filename.includes('git-watcher.js');
+                          filename.includes('git-watcher.js') ||
+                          filename.includes('test-msg.js');
                           
         if (isIgnored) return;
 
