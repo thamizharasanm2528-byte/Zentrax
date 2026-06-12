@@ -1,0 +1,210 @@
+{
+    "indexes": [
+        {
+            "collectionGroup": "ai_memory",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "topic", "order": "ASCENDING" },
+                { "fieldPath": "confidence_score", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_feedback",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "feedback_type", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_chats",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "user_id", "order": "ASCENDING" },
+                { "fieldPath": "updated_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_messages",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "chat_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_messages",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "chat_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_messages",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "chat_id", "order": "ASCENDING" },
+                { "fieldPath": "role", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "ai_conversations",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "user_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "projects",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "members", "arrayConfig": "CONTAINS" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "posts",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "notifications",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "userId", "order": "ASCENDING" },
+                { "fieldPath": "time", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "join_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "project_id", "order": "ASCENDING" },
+                { "fieldPath": "sender_id", "order": "ASCENDING" },
+                { "fieldPath": "status", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "join_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "project_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "join_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "sender_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "mentorship_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "student_id", "order": "ASCENDING" },
+                { "fieldPath": "mentor_id", "order": "ASCENDING" },
+                { "fieldPath": "project_id", "order": "ASCENDING" },
+                { "fieldPath": "status", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "mentorship_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "student_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "mentorship_requests",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "mentor_id", "order": "ASCENDING" },
+                { "fieldPath": "created_at", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "team_invites",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "projectId", "order": "ASCENDING" },
+                { "fieldPath": "senderId", "order": "ASCENDING" },
+                { "fieldPath": "receiverId", "order": "ASCENDING" },
+                { "fieldPath": "status", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "team_invites",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "receiverId", "order": "ASCENDING" },
+                { "fieldPath": "status", "order": "ASCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "doubts",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "studentId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "doubts",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "mentorId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "doubts",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "status", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "project_feedback",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "projectId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "project_reviews",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "projectId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "project_risks",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "projectId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "DESCENDING" }
+            ]
+        },
+        {
+            "collectionGroup": "project_discussions",
+            "queryScope": "COLLECTION",
+            "fields": [
+                { "fieldPath": "projectId", "order": "ASCENDING" },
+                { "fieldPath": "createdAt", "order": "ASCENDING" }
+            ]
+        }
+    ],
+    "fieldOverrides": []
+}
