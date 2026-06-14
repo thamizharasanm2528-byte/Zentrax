@@ -1,9 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { auth } from '../../firebase';
 import { API_BASE_URL } from '../../apiConfig';
 import { Loader2, ArrowRight, ArrowLeft, X, Check } from 'lucide-react';
+
+/* ── TagInput: defined OUTSIDE the component to avoid re-mount on every keystroke ── */
+const TagInput = ({ field, placeholder, tagInputs, setTagInputs, tags, onAdd, onRemove }) => (
+    <div>
+        <div className="flex gap-2">
+            <input
+                type="text"
+                value={tagInputs[field]}
+                onChange={e => setTagInputs(prev => ({ ...prev, [field]: e.target.value }))}
+                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); onAdd(field); } }}
+                className="zen-input flex-1"
+                placeholder={placeholder}
+            />
+            <button type="button" onClick={() => onAdd(field)} className="zen-btn-secondary px-3">Add</button>
+        </div>
+        {tags.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mt-2">
+                {tags.map((tag, i) => (
+                    <span key={i} className="zen-badge flex items-center gap-1">
+                        {tag}
+                        <button type="button" onClick={() => onRemove(field, i)} className="hover:text-red-500"><X className="h-3 w-3" /></button>
+                    </span>
+                ))}
+            </div>
+        )}
+    </div>
+);
 
 const DEPARTMENTS = ['CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT', 'AIDS', 'AIML', 'CSD', 'Other'];
 const YEARS = ['1', '2', '3', '4'];
@@ -50,8 +77,8 @@ const StudentOnboarding = () => {
         setError('');
         try {
             const token = await auth.currentUser?.getIdToken();
-            const res = await fetch(`${API_BASE_URL}/api/users/profile/${user.uid}`, {
-                method: 'PUT',
+            const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     name: form.fullName,
@@ -77,31 +104,7 @@ const StudentOnboarding = () => {
         setLoading(false);
     };
 
-    const TagInput = ({ field, placeholder }) => (
-        <div>
-            <div className="flex gap-2">
-                <input
-                    type="text"
-                    value={tagInputs[field]}
-                    onChange={e => setTagInputs(prev => ({ ...prev, [field]: e.target.value }))}
-                    onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addTag(field); } }}
-                    className="zen-input flex-1"
-                    placeholder={placeholder}
-                />
-                <button type="button" onClick={() => addTag(field)} className="zen-btn-secondary px-3">Add</button>
-            </div>
-            {form[field].length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-2">
-                    {form[field].map((tag, i) => (
-                        <span key={i} className="zen-badge flex items-center gap-1">
-                            {tag}
-                            <button type="button" onClick={() => removeTag(field, i)} className="hover:text-red-500"><X className="h-3 w-3" /></button>
-                        </span>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
+
 
     return (
         <div className="min-h-[calc(100vh-56px)] flex items-center justify-center px-4 py-8" style={{ background: 'var(--color-zen-bg)' }}>
@@ -156,11 +159,11 @@ const StudentOnboarding = () => {
                             <h2 className="text-lg font-bold text-slate-900">Skills & Interests</h2>
                             <div>
                                 <label className="zen-label">Skills * <span className="text-slate-400 font-normal">(type & press Enter)</span></label>
-                                <TagInput field="skills" placeholder="e.g. React, Python, Machine Learning" />
+                                <TagInput field="skills" placeholder="e.g. React, Python, Machine Learning" tagInputs={tagInputs} setTagInputs={setTagInputs} tags={form.skills} onAdd={addTag} onRemove={removeTag} />
                             </div>
                             <div>
                                 <label className="zen-label">Interests * <span className="text-slate-400 font-normal">(type & press Enter)</span></label>
-                                <TagInput field="interests" placeholder="e.g. Web Dev, AI, Cloud" />
+                                <TagInput field="interests" placeholder="e.g. Web Dev, AI, Cloud" tagInputs={tagInputs} setTagInputs={setTagInputs} tags={form.interests} onAdd={addTag} onRemove={removeTag} />
                             </div>
                             <div>
                                 <label className="zen-label">LinkedIn URL</label>
