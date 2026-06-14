@@ -37,21 +37,6 @@ const usePresence = () => {
                     status,
                     lastSeen: serverTimestamp(),
                     uid: user.uid
-                }, { merge: merge && true }); // merge configuration
-            } catch (e) {
-                console.warn('[Presence] Failed to update:', e.message);
-            }
-        };
-
-        // Standard Firestore merge setting workaround
-        const setStatusMerge = async (status) => {
-            if (statusRef.current === status) return;
-            statusRef.current = status;
-            try {
-                await setDoc(presenceRef, {
-                    status,
-                    lastSeen: serverTimestamp(),
-                    uid: user.uid
                 }, { merge: true });
             } catch (e) {
                 console.warn('[Presence] Failed to update:', e.message);
@@ -59,7 +44,7 @@ const usePresence = () => {
         };
 
         // Set online immediately
-        setStatusMerge('online');
+        setStatus('online');
 
         // Heartbeat — keeps presence alive every 60s
         heartbeatRef.current = setInterval(() => {
@@ -78,7 +63,7 @@ const usePresence = () => {
         const resetIdle = () => {
             const now = Date.now();
             if (statusRef.current === 'away') {
-                setStatusMerge('online');
+                setStatus('online');
             } else if (now - lastResetRef.current < 5000) {
                 // Skip if reset was already triggered in the last 5 seconds to throttle
                 return;
@@ -86,7 +71,7 @@ const usePresence = () => {
             lastResetRef.current = now;
             clearTimeout(idleTimerRef.current);
             idleTimerRef.current = setTimeout(() => {
-                setStatusMerge('away');
+                setStatus('away');
             }, IDLE_TIMEOUT);
         };
 
