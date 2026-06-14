@@ -13,6 +13,28 @@ class ErrorBoundary extends React.Component {
 
     componentDidCatch(error, errorInfo) {
         console.error('[ErrorBoundary] Caught render crash:', error, errorInfo);
+
+        // Detect chunk/module loading failures (happens after Netlify redeploys)
+        // Auto-reload the page once to fetch fresh assets
+        const msg = error?.message || '';
+        const isChunkError =
+            msg.includes('Failed to fetch dynamically imported module') ||
+            msg.includes('Loading chunk') ||
+            msg.includes('Loading CSS chunk') ||
+            msg.includes('Importing a module script failed');
+
+        if (isChunkError) {
+            const reloadKey = 'zentrax-chunk-reload';
+            const lastReload = sessionStorage.getItem(reloadKey);
+            const now = Date.now();
+
+            // Only auto-reload once per 30 seconds to avoid infinite loops
+            if (!lastReload || now - Number(lastReload) > 30000) {
+                sessionStorage.setItem(reloadKey, String(now));
+                window.location.reload();
+                return;
+            }
+        }
     }
 
     handleReset = () => {
@@ -39,8 +61,8 @@ class ErrorBoundary extends React.Component {
                             </pre>
                         )}
                         <div className="flex justify-center gap-3">
-                            <button onClick={this.handleReset} className="zen-btn-primary flex items-center gap-2">
-                                <RotateCcw className="h-4 w-4" /> Try Again
+                            <button onClick={() => window.location.reload()} className="zen-btn-primary flex items-center gap-2">
+                                <RotateCcw className="h-4 w-4" /> Reload Page
                             </button>
                             <button onClick={() => window.location.href = '/'} className="zen-btn-secondary">
                                 Go Home
