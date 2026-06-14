@@ -51,12 +51,14 @@ const AdminUsers = () => {
             const headers = await getHeaders();
             if (action === 'delete') {
                 await fetch(`${API}/users/${uid}`, { method: 'DELETE', headers });
+            } else if (action === 'delete-permanent') {
+                await fetch(`${API}/users/${uid}?permanent=true`, { method: 'DELETE', headers });
             } else {
                 await fetch(`${API}/users/${uid}/status`, {
                     method: 'PUT', headers, body: JSON.stringify({ action })
                 });
             }
-            setToast({ message: `User ${action}d successfully`, type: 'success' });
+            setToast({ message: `User ${action === 'delete-permanent' ? 'permanently deleted' : action + 'd'} successfully`, type: 'success' });
             setModal(null);
             fetchUsers();
         } catch {
@@ -108,14 +110,25 @@ const AdminUsers = () => {
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
                     <div className="zen-card p-6 w-full max-w-sm">
-                        <h3 className="text-base font-semibold text-slate-900 mb-2">Confirm Action</h3>
+                        <h3 className="text-base font-semibold text-slate-900 mb-2">
+                            {modal.action === 'delete' && modal.isInactive ? 'Permanently Delete User' : 'Confirm Action'}
+                        </h3>
                         <p className="text-sm text-slate-500 mb-6">
-                            Are you sure you want to <span className="text-slate-900 font-medium">{modal.action}</span> user <span style={{ color: '#4F46E5' }}>{modal.name}</span>?
-                            {modal.action === 'delete' && <span className="block mt-1 text-red-400 text-xs">This action cannot be undone.</span>}
+                            {modal.action === 'delete' && modal.isInactive ? (
+                                <>
+                                    Are you sure you want to <span className="text-red-500 font-semibold">permanently delete</span> user <span style={{ color: '#4F46E5' }}>{modal.name}</span>?
+                                    <span className="block mt-2 text-red-500 text-xs font-semibold">WARNING: This will erase all user data permanently. This action cannot be undone.</span>
+                                </>
+                            ) : (
+                                <>
+                                    Are you sure you want to <span className="text-slate-900 font-medium">{modal.action}</span> user <span style={{ color: '#4F46E5' }}>{modal.name}</span>?
+                                    {modal.action === 'delete' && <span className="block mt-1 text-red-400 text-xs">This action cannot be undone.</span>}
+                                </>
+                            )}
                         </p>
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setModal(null)} className="zen-btn-secondary text-sm">Cancel</button>
-                            <button onClick={() => handleAction(modal.action, modal.uid)}
+                            <button onClick={() => handleAction(modal.action === 'delete' && modal.isInactive ? 'delete-permanent' : modal.action, modal.uid)}
                                 className={modal.action === 'delete' ? 'zen-btn-danger text-sm' : 'zen-btn-primary text-sm'}>
                                 Confirm
                             </button>
@@ -268,7 +281,7 @@ const AdminUsers = () => {
                                                     <button title="Flag" onClick={() => handleAction('flag', u.uid)}
                                                         className="p-1.5 text-slate-500 hover:text-yellow-600 rounded-md transition-colors"><Shield className="h-3.5 w-3.5" /></button>
                                                 )}
-                                                <button title="Delete" onClick={() => setModal({ action: 'delete', uid: u.uid, name: u.name || u.email })}
+                                                <button title="Delete" onClick={() => setModal({ action: 'delete', uid: u.uid, name: u.name || u.email, isInactive: u.is_active === false })}
                                                     className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
                                             </div>
                                         </td>
