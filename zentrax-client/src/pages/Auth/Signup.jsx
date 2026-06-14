@@ -125,7 +125,7 @@ const Signup = () => {
             const result = await signup(emailLower, password);
             const token = await result.user.getIdToken();
 
-            const res = await fetch(`${API_BASE_URL}/api/users/register`, {
+            const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ uid: result.user.uid, email: emailLower, name: name.trim(), role: 'student' })
