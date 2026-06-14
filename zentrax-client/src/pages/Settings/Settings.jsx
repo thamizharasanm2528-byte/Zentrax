@@ -547,15 +547,16 @@ const Settings = () => {
                     <div className={cardClass}>
                         {sectionTitle(<Shield className="h-5 w-5 text-primary-600" />, 'Change Password')}
 
-                        {/* Hidden autofill trap for this form specifically */}
-                        <input type="text" name="trap_user" autoComplete="username" className="w-0 h-0 opacity-0 absolute pointer-events-none" tabIndex={-1} aria-hidden="true" />
+                        {/* Hidden autofill traps to prevent browser autofill */}
+                        <input type="text" name="trap_user_fake" autoComplete="off" className="w-0 h-0 opacity-0 absolute pointer-events-none" tabIndex={-1} aria-hidden="true" />
+                        <input type="password" name="trap_pwd_fake" autoComplete="off" className="w-0 h-0 opacity-0 absolute pointer-events-none" tabIndex={-1} aria-hidden="true" />
 
                         <div className="space-y-4">
                             <div>
                                 <label className={labelClass}>Current Password</label>
                                 <div className="relative">
-                                    <input type={showCurrent ? 'text' : 'password'} autoComplete="current-password"
-                                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={`${inputClass} pr-12`} />
+                                    <input type={showCurrent ? 'text' : 'password'} autoComplete="off" name="current-pwd-zentrax"
+                                        value={currentPassword} onChange={e => setCurrentPassword(e.target.value)} className={`${inputClass} pr-12`} placeholder="Enter your current password" />
                                     <button type="button" onClick={() => setShowCurrent(!showCurrent)}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
                                         {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
