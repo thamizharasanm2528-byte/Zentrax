@@ -8,33 +8,48 @@ import { Loader2, ShieldAlert } from 'lucide-react';
 import { API_BASE_URL } from './apiConfig';
 import ErrorBoundary from './components/ErrorBoundary';
 
+// Retry wrapper for lazy imports — handles stale chunks after Netlify redeploys
+const lazyRetry = (importFn) => lazy(() =>
+    importFn().catch(() => {
+        const reloadKey = 'zentrax-chunk-reload';
+        const lastReload = sessionStorage.getItem(reloadKey);
+        const now = Date.now();
+        if (!lastReload || now - Number(lastReload) > 30000) {
+            sessionStorage.setItem(reloadKey, String(now));
+            window.location.reload();
+        }
+        // Return a fallback so React doesn't crash while reloading
+        return { default: () => null };
+    })
+);
+
 // Lazy-loaded pages
-const Login = lazy(() => import('./pages/Auth/Login'));
-const Signup = lazy(() => import('./pages/Auth/Signup'));
-const StudentDashboard = lazy(() => import('./pages/Dashboard/StudentDashboard'));
-const MentorDashboard = lazy(() => import('./pages/Dashboard/MentorDashboard'));
-const Dashboard = lazy(() => import('./pages/Dashboard/Dashboard'));
-const CreateProject = lazy(() => import('./pages/Workspace/CreateProject'));
-const ProjectRoom = lazy(() => import('./pages/Workspace/ProjectRoom'));
-const MentorProjectView = lazy(() => import('./pages/Workspace/MentorProjectView'));
-const SubmitDoubt = lazy(() => import('./pages/Mentorship/SubmitDoubt'));
-const MentoringDoubts = lazy(() => import('./pages/Mentorship/MentoringDoubts'));
-const AssignedTeams = lazy(() => import('./pages/Mentorship/AssignedTeams'));
-const RequestMentor = lazy(() => import('./pages/Mentorship/RequestMentor'));
+const Login = lazyRetry(() => import('./pages/Auth/Login'));
+const Signup = lazyRetry(() => import('./pages/Auth/Signup'));
+const StudentDashboard = lazyRetry(() => import('./pages/Dashboard/StudentDashboard'));
+const MentorDashboard = lazyRetry(() => import('./pages/Dashboard/MentorDashboard'));
+const Dashboard = lazyRetry(() => import('./pages/Dashboard/Dashboard'));
+const CreateProject = lazyRetry(() => import('./pages/Workspace/CreateProject'));
+const ProjectRoom = lazyRetry(() => import('./pages/Workspace/ProjectRoom'));
+const MentorProjectView = lazyRetry(() => import('./pages/Workspace/MentorProjectView'));
+const SubmitDoubt = lazyRetry(() => import('./pages/Mentorship/SubmitDoubt'));
+const MentoringDoubts = lazyRetry(() => import('./pages/Mentorship/MentoringDoubts'));
+const AssignedTeams = lazyRetry(() => import('./pages/Mentorship/AssignedTeams'));
+const RequestMentor = lazyRetry(() => import('./pages/Mentorship/RequestMentor'));
 // MentorChat merged into MessagesHub
-const RequestSession = lazy(() => import('./pages/Mentorship/RequestSession'));
-const LiveSession = lazy(() => import('./pages/Mentorship/LiveSession'));
-const FindTeam = lazy(() => import('./pages/Dashboard/FindTeam'));
-const JoinTeam = lazy(() => import('./pages/Dashboard/JoinTeam'));
-const AIAssistant = lazy(() => import('./pages/AI/AIAssistant'));
-const Notifications = lazy(() => import('./pages/Notifications/Notifications'));
-const Settings = lazy(() => import('./pages/Settings/Settings'));
-const MyProjects = lazy(() => import('./pages/Projects/MyProjects'));
-const MentorshipHub = lazy(() => import('./pages/Mentorship/MentorshipHub'));
-const ChatPageV2 = lazy(() => import('./pages/Mentorship/ChatPage'));
-const DirectMessages = lazy(() => import('./pages/Messages/DirectMessages'));
-const StudentAnalytics = lazy(() => import('./pages/Dashboard/StudentAnalytics'));
-const MentorAnalytics = lazy(() => import('./pages/Dashboard/MentorAnalytics'));
+const RequestSession = lazyRetry(() => import('./pages/Mentorship/RequestSession'));
+const LiveSession = lazyRetry(() => import('./pages/Mentorship/LiveSession'));
+const FindTeam = lazyRetry(() => import('./pages/Dashboard/FindTeam'));
+const JoinTeam = lazyRetry(() => import('./pages/Dashboard/JoinTeam'));
+const AIAssistant = lazyRetry(() => import('./pages/AI/AIAssistant'));
+const Notifications = lazyRetry(() => import('./pages/Notifications/Notifications'));
+const Settings = lazyRetry(() => import('./pages/Settings/Settings'));
+const MyProjects = lazyRetry(() => import('./pages/Projects/MyProjects'));
+const MentorshipHub = lazyRetry(() => import('./pages/Mentorship/MentorshipHub'));
+const ChatPageV2 = lazyRetry(() => import('./pages/Mentorship/ChatPage'));
+const DirectMessages = lazyRetry(() => import('./pages/Messages/DirectMessages'));
+const StudentAnalytics = lazyRetry(() => import('./pages/Dashboard/StudentAnalytics'));
+const MentorAnalytics = lazyRetry(() => import('./pages/Dashboard/MentorAnalytics'));
 // ProjectShowcase merged into MyProjects
 
 // Onboarding
