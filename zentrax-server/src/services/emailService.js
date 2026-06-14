@@ -416,4 +416,82 @@ async function sendNotificationEmail({ recipientEmail, recipientName, subject, t
     }
 }
 
-module.exports = { sendMentorNotificationEmail, sendWelcomeEmail, sendNotificationEmail };
+/**
+ * Send a premium mentor invite email with the registration code.
+ *
+ * @param {Object} options
+ * @param {string} options.email  — recipient email
+ * @param {string} options.name   — recipient name
+ * @param {string} options.code   — the unique invite code
+ * @returns {Promise<boolean>}    — true on success, false on failure (never throws)
+ */
+async function sendMentorInviteEmail({ email, name, code }) {
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+        console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping invite email');
+        return false;
+    }
+
+    if (!email) {
+        console.warn('[Email] No email provided — skipping invite email');
+        return false;
+    }
+
+    const signupLink = `https://zentraxplatform.netlify.app/signup?role=mentor&code=${code}&email=${encodeURIComponent(email)}`;
+    const subject = `Invitation to join ZENTRAX as a Mentor`;
+
+    const bodyHtml = `
+              <p style="margin:0 0 20px; color:${BRAND.text}; font-size:16px; line-height:1.6; font-family:${BRAND.fontStack};">
+                Dear <strong>${name || 'Mentor'}</strong>,
+              </p>
+              <p style="margin:0 0 24px; color:${BRAND.textSecondary}; font-size:15px; line-height:1.7; font-family:${BRAND.fontStack};">
+                You have been invited to join the <strong style="color:${BRAND.primary};">ZENTRAX</strong> platform as a Mentor.
+                As a mentor, you can guide students, help resolve technical doubts, monitor project progress, and host live sessions.
+              </p>
+
+              <!-- Invite Code Display Card -->
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:${BRAND.bgSubtle}; border-radius:12px; border:1px solid ${BRAND.border}; margin-bottom:28px; text-align:center;">
+                <tr>
+                  <td style="padding:28px;">
+                    <p style="margin:0 0 8px; font-size:12px; font-weight:700; color:${BRAND.textSecondary}; text-transform:uppercase; letter-spacing:1.5px; font-family:${BRAND.fontStack};">
+                      Your Invite Code
+                    </p>
+                    <p style="margin:0; font-size:32px; font-weight:800; color:${BRAND.primary}; letter-spacing:4px; font-family:${BRAND.fontStack};">
+                      ${code}
+                    </p>
+                    <p style="margin:12px 0 0; font-size:11px; color:${BRAND.textMuted}; font-family:${BRAND.fontStack};">
+                      This code is bound to your email address and will expire in 72 hours.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:0 0 16px; color:${BRAND.textSecondary}; font-size:14px; line-height:1.7; font-family:${BRAND.fontStack};">
+                Please click the button below to register and activate your mentor account:
+              </p>
+
+              ${buildCTA('Accept Invitation & Register', signupLink)}
+
+              <p style="margin:28px 0 0; text-align:center; color:${BRAND.textMuted}; font-size:13px; font-family:${BRAND.fontStack};">
+                Warm regards,<br>
+                <strong style="color:${BRAND.primary};">The ZENTRAX Team</strong>
+              </p>
+    `;
+
+    const html = buildEmailShell({ subtitle: 'Invitation', bodyHtml });
+
+    try {
+        await transporter.sendMail({
+            from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject,
+            html
+        });
+        console.log(`[Email] Invite email sent to ${email} with code ${code}`);
+        return true;
+    } catch (error) {
+        console.error(`[Email] Failed to send invite email to ${email}: ${error.message}`);
+        return false;
+    }
+}
+
+module.exports = { sendMentorNotificationEmail, sendWelcomeEmail, sendNotificationEmail, sendMentorInviteEmail };

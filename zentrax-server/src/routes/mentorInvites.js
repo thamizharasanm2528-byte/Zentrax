@@ -3,6 +3,7 @@ const router = express.Router();
 const crypto = require('crypto');
 const { verifyToken, db } = require('../middleware/auth');
 const { checkAdminAccess } = require('../middleware/adminAuth');
+const { sendMentorInviteEmail } = require('../services/emailService');
 
 const INVITES_COLLECTION = 'mentor_invites';
 const INVITE_EXPIRY_HOURS = 72;
