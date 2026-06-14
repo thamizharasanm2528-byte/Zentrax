@@ -155,6 +155,23 @@ exports.updateUserStatus = async (req, res) => {
 exports.deleteUser = async (req, res) => {
     try {
         const { uid } = req.params;
+        const { permanent } = req.query;
+
+        if (permanent === 'true') {
+            // Delete from Firestore
+            await db.collection('users').doc(uid).delete();
+            // Delete from Firebase Auth
+            try {
+                if (admin && admin.auth) {
+                    await admin.auth().deleteUser(uid);
+                }
+            } catch (authErr) {
+                console.warn(`[Admin] Firebase Auth delete failed for ${uid}:`, authErr.message);
+            }
+            await logAdminAction(req.user.email, 'user_permanent_delete', 'user', uid);
+            return res.json({ success: true, message: 'User permanently deleted successfully' });
+        }
+
         // Soft delete — mark as inactive and deleted
         await db.collection('users').doc(uid).update({
             is_active: false,
