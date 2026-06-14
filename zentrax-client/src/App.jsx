@@ -53,24 +53,24 @@ const MentorAnalytics = lazyRetry(() => import('./pages/Dashboard/MentorAnalytic
 // ProjectShowcase merged into MyProjects
 
 // Onboarding
-const StudentOnboarding = lazy(() => import('./pages/Onboarding/StudentOnboarding'));
-const MentorOnboarding = lazy(() => import('./pages/Onboarding/MentorOnboarding'));
+const StudentOnboarding = lazyRetry(() => import('./pages/Onboarding/StudentOnboarding'));
+const MentorOnboarding = lazyRetry(() => import('./pages/Onboarding/MentorOnboarding'));
 
 // Landing
-const Landing = lazy(() => import('./pages/Landing/Landing'));
+const Landing = lazyRetry(() => import('./pages/Landing/Landing'));
 
 // Help
-const Help = lazy(() => import('./pages/Help/Help'));
+const Help = lazyRetry(() => import('./pages/Help/Help'));
 
 // Admin pages
-const AdminOverview = lazy(() => import('./pages/Admin/AdminOverview'));
-const AdminUsers = lazy(() => import('./pages/Admin/AdminUsers'));
-const AdminProjects = lazy(() => import('./pages/Admin/AdminProjects'));
-const AdminMentorship = lazy(() => import('./pages/Admin/AdminMentorship'));
-const AdminReports = lazy(() => import('./pages/Admin/AdminReports'));
-const AdminLogs = lazy(() => import('./pages/Admin/AdminLogs'));
-const AdminSystemHealth = lazy(() => import('./pages/Admin/AdminSystemHealth'));
-const AdminMentorInvites = lazy(() => import('./pages/Admin/AdminMentorInvites'));
+const AdminOverview = lazyRetry(() => import('./pages/Admin/AdminOverview'));
+const AdminUsers = lazyRetry(() => import('./pages/Admin/AdminUsers'));
+const AdminProjects = lazyRetry(() => import('./pages/Admin/AdminProjects'));
+const AdminMentorship = lazyRetry(() => import('./pages/Admin/AdminMentorship'));
+const AdminReports = lazyRetry(() => import('./pages/Admin/AdminReports'));
+const AdminLogs = lazyRetry(() => import('./pages/Admin/AdminLogs'));
+const AdminSystemHealth = lazyRetry(() => import('./pages/Admin/AdminSystemHealth'));
+const AdminMentorInvites = lazyRetry(() => import('./pages/Admin/AdminMentorInvites'));
 
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center" style={{ background: '#030712' }}>
