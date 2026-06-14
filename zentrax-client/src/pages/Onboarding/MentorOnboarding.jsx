@@ -56,8 +56,8 @@ const MentorOnboarding = () => {
         setError('');
         try {
             const token = await auth.currentUser?.getIdToken();
-            const res = await fetch(`${API_BASE_URL}/api/users/profile/${user.uid}`, {
-                method: 'PUT',
+            const res = await fetch(`${API_BASE_URL}/api/users/profile`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({
                     name: form.fullName,
