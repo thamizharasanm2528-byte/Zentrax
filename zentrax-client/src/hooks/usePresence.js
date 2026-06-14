@@ -21,6 +21,7 @@ const usePresence = () => {
     const idleTimerRef = useRef(null);
     const heartbeatRef = useRef(null);
     const statusRef = useRef('online');
+    const lastResetRef = useRef(0);
 
     useEffect(() => {
         if (!user?.uid) return;
@@ -36,6 +37,21 @@ const usePresence = () => {
                     status,
                     lastSeen: serverTimestamp(),
                     uid: user.uid
+                }, { merge: merge && true }); // merge configuration
+            } catch (e) {
+                console.warn('[Presence] Failed to update:', e.message);
+            }
+        };
+
+        // Standard Firestore merge setting workaround
+        const setStatusMerge = async (status) => {
+            if (statusRef.current === status) return;
+            statusRef.current = status;
+            try {
+                await setDoc(presenceRef, {
+                    status,
+                    lastSeen: serverTimestamp(),
+                    uid: user.uid
                 }, { merge: true });
             } catch (e) {
                 console.warn('[Presence] Failed to update:', e.message);
@@ -43,7 +59,7 @@ const usePresence = () => {
         };
 
         // Set online immediately
-        setStatus('online');
+        setStatusMerge('online');
 
         // Heartbeat — keeps presence alive every 60s
         heartbeatRef.current = setInterval(() => {
@@ -60,12 +76,17 @@ const usePresence = () => {
         const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes
 
         const resetIdle = () => {
+            const now = Date.now();
             if (statusRef.current === 'away') {
-                setStatus('online');
+                setStatusMerge('online');
+            } else if (now - lastResetRef.current < 5000) {
+                // Skip if reset was already triggered in the last 5 seconds to throttle
+                return;
             }
+            lastResetRef.current = now;
             clearTimeout(idleTimerRef.current);
             idleTimerRef.current = setTimeout(() => {
-                setStatus('away');
+                setStatusMerge('away');
             }, IDLE_TIMEOUT);
         };
 
