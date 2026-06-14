@@ -74,6 +74,10 @@ router.post('/mentor-invites', verifyToken, checkAdminAccess, async (req, res) =
 
         await db.collection(INVITES_COLLECTION).doc(code).set(inviteData);
 
+        // Send email with invite code (non-blocking)
+        sendMentorInviteEmail({ email: mentorEmail, name: mentorName, code })
+            .catch(emailErr => console.error('[MentorInvite] Non-fatal: failed to send invite email:', emailErr.message));
+
         console.log(`[MentorInvite] ✅ Created invite | code=${code} | email=${mentorEmail} | by=${req.user.email}`);
 
         res.status(201).json({
