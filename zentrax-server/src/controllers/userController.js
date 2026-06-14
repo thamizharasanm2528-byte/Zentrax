@@ -33,7 +33,6 @@ exports.createUserProfile = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Account created successfully',
-            welcomeEmailSent,
             user: userData
         });
     } catch (error) {
