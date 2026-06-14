@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, setPersistence, browserSessionPersistence } from "firebase/auth";
+import { getAuth, setPersistence, browserLocalPersistence } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -22,7 +22,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
 
-export const authReady = setPersistence(auth, browserSessionPersistence)
+export const authReady = setPersistence(auth, browserLocalPersistence)
     .then(() => {
         console.log("⚡ Firebase: Auth Persistence Initialized");
         return true;
