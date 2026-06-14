@@ -46,7 +46,8 @@ const StudentOnboarding = () => {
         fullName: '', department: '', year: '',
         skills: [], interests: [],
         linkedin: '', github: '',
-        resume: '', previousExperience: '', careerGoal: ''
+        resume: '', previousExperience: '', careerGoal: '',
+        isFresher: false
     });
 
     const [tagInputs, setTagInputs] = useState({ skills: '', interests: '' });
@@ -68,7 +69,7 @@ const StudentOnboarding = () => {
     const canProceed = () => {
         if (step === 1) return form.fullName && form.department && form.year;
         if (step === 2) return form.skills.length > 0 && form.interests.length > 0;
-        if (step === 3) return form.previousExperience && form.careerGoal;
+        if (step === 3) return form.isFresher || (form.previousExperience && form.careerGoal);
         return true;
     };
 
@@ -90,8 +91,9 @@ const StudentOnboarding = () => {
                     linkedin: form.linkedin,
                     github: form.github,
                     resume: form.resume,
-                    previousExperience: form.previousExperience,
-                    careerGoal: form.careerGoal,
+                    isFresher: form.isFresher,
+                    previousExperience: form.isFresher ? '' : form.previousExperience,
+                    careerGoal: form.isFresher ? '' : form.careerGoal,
                     profileCompleted: true
                 })
             });
@@ -180,17 +182,44 @@ const StudentOnboarding = () => {
                     {step === 3 && (
                         <>
                             <h2 className="text-lg font-bold text-slate-900">Experience & Goals</h2>
+
+                            {/* Fresher toggle */}
+                            <label
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '10px',
+                                    padding: '12px 16px', borderRadius: '12px', cursor: 'pointer',
+                                    background: form.isFresher ? 'rgba(79,70,229,0.06)' : 'rgba(100,116,139,0.04)',
+                                    border: `1.5px solid ${form.isFresher ? 'rgba(79,70,229,0.3)' : 'rgba(100,116,139,0.12)'}`,
+                                    transition: 'all 0.2s',
+                                }}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={form.isFresher}
+                                    onChange={e => updateField('isFresher', e.target.checked)}
+                                    style={{ width: '16px', height: '16px', accentColor: '#4F46E5', cursor: 'pointer' }}
+                                />
+                                <div>
+                                    <span style={{ fontSize: '14px', fontWeight: 600, color: form.isFresher ? '#4F46E5' : '#334155' }}>
+                                        I'm a fresher
+                                    </span>
+                                    <p style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px', lineHeight: 1.4 }}>
+                                        No prior project experience? No worries — skip the fields below
+                                    </p>
+                                </div>
+                            </label>
+
                             <div>
                                 <label className="zen-label">Resume URL</label>
                                 <input type="url" value={form.resume} onChange={e => updateField('resume', e.target.value)} className="zen-input" placeholder="Link to your resume (Drive, etc.)" />
                             </div>
-                            <div>
-                                <label className="zen-label">Previous Project Experience *</label>
-                                <textarea value={form.previousExperience} onChange={e => updateField('previousExperience', e.target.value)} className="zen-input resize-none" rows={3} placeholder="Describe your past projects..." />
+                            <div style={{ opacity: form.isFresher ? 0.45 : 1, pointerEvents: form.isFresher ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                                <label className="zen-label">Previous Project Experience {!form.isFresher && '*'}</label>
+                                <textarea value={form.previousExperience} onChange={e => updateField('previousExperience', e.target.value)} className="zen-input resize-none" rows={3} placeholder={form.isFresher ? 'Skipped for freshers' : 'Describe your past projects...'} />
                             </div>
-                            <div>
-                                <label className="zen-label">Career Goal *</label>
-                                <textarea value={form.careerGoal} onChange={e => updateField('careerGoal', e.target.value)} className="zen-input resize-none" rows={3} placeholder="What do you want to achieve?" />
+                            <div style={{ opacity: form.isFresher ? 0.45 : 1, pointerEvents: form.isFresher ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
+                                <label className="zen-label">Career Goal {!form.isFresher && '*'}</label>
+                                <textarea value={form.careerGoal} onChange={e => updateField('careerGoal', e.target.value)} className="zen-input resize-none" rows={3} placeholder={form.isFresher ? 'Skipped for freshers' : 'What do you want to achieve?'} />
                             </div>
                         </>
                     )}
