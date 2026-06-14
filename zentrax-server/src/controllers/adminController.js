@@ -34,8 +34,11 @@ exports.getOverview = async (req, res) => {
         const metrics = {
             totalUsers: users.length,
             totalStudents: users.filter(u => u.role === 'student').length,
+            students: users.filter(u => u.role === 'student').length,
             totalMentors: users.filter(u => u.role === 'mentor').length,
+            mentors: users.filter(u => u.role === 'mentor').length,
             totalProjects: projectsSnap.size,
+            projects: projectsSnap.size,
             activeProjects: projectsSnap.docs.filter(d => {
                 const s = d.data().status;
                 return s === 'development' || s === 'planning' || s === 'testing';
