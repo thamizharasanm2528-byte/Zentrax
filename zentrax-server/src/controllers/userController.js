@@ -22,17 +22,12 @@ exports.createUserProfile = async (req, res) => {
 
         await db.collection('users').doc(uid).set(userData);
 
-        // Send welcome email (non-blocking — signup succeeds even if email fails)
-        let welcomeEmailSent = false;
-        try {
-            const userEmail = req.user?.email || req.body.email || '';
-            welcomeEmailSent = await sendWelcomeEmail({
-                userEmail,
-                userName: name,
-                role
+        // Send welcome email (fire-and-forget — signup succeeds even if email fails)
+        const userEmail = req.user?.email || req.body.email || '';
+        if (userEmail) {
+            sendWelcomeEmail({ userEmail, userName: name, role }).catch(emailErr => {
+                console.error('[Email] Non-fatal error in welcome email flow:', emailErr.message);
             });
-        } catch (emailErr) {
-            console.error('[Email] Non-fatal error in welcome email flow:', emailErr.message);
         }
 
         res.status(201).json({
