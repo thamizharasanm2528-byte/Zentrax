@@ -20,6 +20,7 @@ router.use(verifyToken, checkAdminAccess);
 
 // Overview
 router.get('/overview', admin.getOverview);
+router.get('/stats', admin.getOverview);
 
 // Users
 router.get('/users', admin.getUsers);

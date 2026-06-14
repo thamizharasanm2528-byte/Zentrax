@@ -1,4 +1,4 @@
-const { db } = require('../middleware/auth');
+const { db, admin } = require('../middleware/auth');
 
 // ─── Helper: log admin action ───
 async function logAdminAction(adminEmail, action, targetType, targetId) {
