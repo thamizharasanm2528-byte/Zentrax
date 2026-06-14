@@ -33,7 +33,9 @@ const io = new Server(server, {
 app.use(helmet({
     crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
-app.use(morgan('dev'));
+if (process.env.NODE_ENV !== 'production') {
+    app.use(morgan('dev'));
+}
 
 app.use(cors({
     origin: function (origin, callback) {

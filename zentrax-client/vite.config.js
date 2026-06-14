@@ -18,13 +18,14 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('three') || id.includes('@react-three')) {
+            const normalizedId = id.replace(/\\/g, '/');
+            if (normalizedId.includes('/three/') || normalizedId.includes('/@react-three/')) {
               return 'threejs-vendor';
             }
-            if (id.includes('firebase')) {
+            if (normalizedId.includes('/firebase/')) {
               return 'firebase-vendor';
             }
-            if (id.includes('react-syntax-highlighter')) {
+            if (normalizedId.includes('/react-syntax-highlighter/')) {
               return 'syntax-highlighter-vendor';
             }
             return 'vendor';
