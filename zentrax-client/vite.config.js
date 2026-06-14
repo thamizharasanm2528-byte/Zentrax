@@ -19,13 +19,23 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes('node_modules')) {
             const normalizedId = id.replace(/\\/g, '/');
-            if (normalizedId.includes('/three/') || normalizedId.includes('/@react-three/')) {
+            if (
+              normalizedId.includes('node_modules/three') ||
+              normalizedId.includes('node_modules/@react-three') ||
+              normalizedId.includes('.pnpm/three') ||
+              normalizedId.includes('.pnpm/@react-three')
+            ) {
               return 'threejs-vendor';
             }
-            if (normalizedId.includes('/firebase/')) {
+            if (
+              normalizedId.includes('node_modules/firebase') ||
+              normalizedId.includes('node_modules/@firebase') ||
+              normalizedId.includes('.pnpm/firebase') ||
+              normalizedId.includes('.pnpm/@firebase')
+            ) {
               return 'firebase-vendor';
             }
-            if (normalizedId.includes('/react-syntax-highlighter/')) {
+            if (normalizedId.includes('react-syntax-highlighter')) {
               return 'syntax-highlighter-vendor';
             }
             return 'vendor';
