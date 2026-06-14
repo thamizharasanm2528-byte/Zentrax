@@ -1,5 +1,19 @@
 const nodemailer = require('nodemailer');
 
+// Clean credentials in process.env to remove any enclosing double/single quotes from hosting panels
+if (process.env.EMAIL_USER) {
+    let user = process.env.EMAIL_USER.trim();
+    if (user.startsWith('"') && user.endsWith('"')) user = user.slice(1, -1);
+    else if (user.startsWith("'") && user.endsWith("'")) user = user.slice(1, -1);
+    process.env.EMAIL_USER = user;
+}
+if (process.env.EMAIL_PASS) {
+    let pass = process.env.EMAIL_PASS.trim();
+    if (pass.startsWith('"') && pass.endsWith('"')) pass = pass.slice(1, -1);
+    else if (pass.startsWith("'") && pass.endsWith("'")) pass = pass.slice(1, -1);
+    process.env.EMAIL_PASS = pass;
+}
+
 // ─── Configure transporter using Gmail SMTP ───
 const transporter = nodemailer.createTransport({
     service: 'gmail',
