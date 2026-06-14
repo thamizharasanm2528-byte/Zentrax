@@ -7,6 +7,10 @@ const AdminOverview = () => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const token = await auth.currentUser?.getIdToken();
                 const res = await fetch(`${API_BASE_URL}/api/admin/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
