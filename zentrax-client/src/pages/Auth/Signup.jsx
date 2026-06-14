@@ -135,6 +135,8 @@ const Signup = () => {
                 const data = await res.json();
                 throw new Error(data.error || 'Failed to create profile');
             }
+            // Populate AuthContext with the newly created profile before navigating
+            await fetchUserProfile(result.user.uid);
             navigate('/onboarding/student', { replace: true });
         } catch (err) {
             const code = err.code || '';
