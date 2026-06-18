@@ -25,7 +25,16 @@ async function test() {
             }
         };
 
+        // Create temporary user document for the mock mentor
+        await db.collection('users').doc('new_mentor_123').set({
+            role: 'mentor',
+            name: 'New Mock Mentor'
+        });
+
         await getDoubts(req, res);
+
+        // Clean up
+        await db.collection('users').doc('new_mentor_123').delete();
     } catch (err) {
         console.error(err);
     }
