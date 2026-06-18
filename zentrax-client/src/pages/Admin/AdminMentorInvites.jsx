@@ -19,6 +19,8 @@ const AdminMentorInvites = () => {
     const [creating, setCreating] = useState(false);
     const [copiedCode, setCopiedCode] = useState(null);
     const [confirmRevoke, setConfirmRevoke] = useState(null);
+    const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
+    const [clearingHistory, setClearingHistory] = useState(false);
 
     const getHeaders = useCallback(async () => {
         const token = await auth.currentUser?.getIdToken();
