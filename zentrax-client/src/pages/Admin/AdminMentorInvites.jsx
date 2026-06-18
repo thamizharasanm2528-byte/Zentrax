@@ -278,27 +278,36 @@ const AdminMentorInvites = () => {
             </div>
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b" style={{ borderColor: 'var(--color-zen-border)', paddingBottom: '1px' }}>
-                <button
-                    onClick={() => setActiveTab('active')}
-                    className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === 'active'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`}
-                >
-                    Active Invites ({activeCount})
-                </button>
-                <button
-                    onClick={() => setActiveTab('history')}
-                    className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
-                        activeTab === 'history'
-                            ? 'border-indigo-600 text-indigo-600'
-                            : 'border-transparent text-slate-500 hover:text-slate-700'
-                    }`}
-                >
-                    Invite History ({usedCount + expiredCount})
-                </button>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b gap-2" style={{ borderColor: 'var(--color-zen-border)', paddingBottom: '1px' }}>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setActiveTab('active')}
+                        className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
+                            activeTab === 'active'
+                                ? 'border-indigo-600 text-indigo-600'
+                                : 'border-transparent text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        Active Invites ({activeCount})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('history')}
+                        className={`px-4 py-2 text-sm font-semibold transition-all border-b-2 ${
+                            activeTab === 'history'
+                                ? 'border-indigo-600 text-indigo-600'
+                                : 'border-transparent text-slate-500 hover:text-slate-700'
+                        }`}
+                    >
+                        Invite History ({usedCount + expiredCount})
+                    </button>
+                </div>
+                {activeTab === 'history' && (usedCount > 0 || expiredCount > 0) && (
+                    <button onClick={() => setShowClearConfirm(true)} disabled={clearingHistory} className="zen-btn-danger text-sm flex items-center gap-1.5 mb-1.5"
+                        style={{ background: '#EF4444', color: '#FFFFFF' }}>
+                        {clearingHistory ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                        Clear History
+                    </button>
+                )}
             </div>
 
             {/* Invites Table */}
