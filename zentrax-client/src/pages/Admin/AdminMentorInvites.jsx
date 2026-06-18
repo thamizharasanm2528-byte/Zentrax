@@ -79,16 +79,38 @@ const AdminMentorInvites = () => {
             const headers = await getHeaders();
             const res = await fetch(`${API}/mentor-invites/${code}`, { method: 'DELETE', headers });
             if (res.ok) {
-                showToast('Invite revoked successfully.');
+                showToast('Invite deleted successfully.');
                 setConfirmRevoke(null);
                 fetchInvites();
             } else {
                 const data = await res.json();
-                showToast(data.error || 'Failed to revoke.', 'error');
+                showToast(data.error || 'Failed to delete invite.', 'error');
             }
         } catch {
-            showToast('Failed to revoke invite.', 'error');
+            showToast('Failed to delete invite.', 'error');
         }
+    };
+
+    const handleClearHistory = async () => {
+        if (!window.confirm("Are you sure you want to clear all used and expired invite codes?")) return;
+        setClearingHistory(true);
+        try {
+            const headers = await getHeaders();
+            const res = await fetch(`${API}/mentor-invites/clear-history`, {
+                method: 'POST',
+                headers
+            });
+            const data = await res.json();
+            if (res.ok && data.success) {
+                showToast('Invite history cleared successfully.');
+                fetchInvites();
+            } else {
+                showToast(data.error || 'Failed to clear history.', 'error');
+            }
+        } catch {
+            showToast('Failed to clear invite history.', 'error');
+        }
+        setClearingHistory(false);
     };
 
     const copyCode = (code) => {
@@ -141,14 +163,18 @@ const AdminMentorInvites = () => {
             {confirmRevoke && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
                     <div className="zen-card p-6 w-full max-w-sm">
-                        <h3 className="text-base font-semibold text-slate-900 mb-2">Revoke Invite</h3>
+                        <h3 className="text-base font-semibold text-slate-900 mb-2">
+                            {confirmRevoke.status === 'active' ? 'Revoke Invite' : 'Delete Log'}
+                        </h3>
                         <p className="text-sm text-slate-500 mb-2">
-                            Are you sure you want to revoke the invite for <span style={{ color: '#4F46E5' }} className="font-medium">{confirmRevoke.email}</span>?
+                            Are you sure you want to {confirmRevoke.status === 'active' ? 'revoke' : 'delete'} the invite record for <span style={{ color: '#4F46E5' }} className="font-medium">{confirmRevoke.email}</span>?
                         </p>
                         <p className="text-xs text-slate-400 mb-6">Code: <code className="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-slate-700">{confirmRevoke.code}</code></p>
                         <div className="flex justify-end gap-3">
                             <button onClick={() => setConfirmRevoke(null)} className="zen-btn-secondary text-sm">Cancel</button>
-                            <button onClick={() => handleRevoke(confirmRevoke.code)} className="zen-btn-danger text-sm">Revoke</button>
+                            <button onClick={() => handleRevoke(confirmRevoke.code)} className="zen-btn-danger text-sm">
+                                {confirmRevoke.status === 'active' ? 'Revoke' : 'Delete'}
+                            </button>
                         </div>
                     </div>
                 </div>
