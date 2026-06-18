@@ -40,6 +40,13 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
   console.warn('[Email] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
 }
 
+transporter.verify((error) => {
+  if (error) {
+    console.error("SMTP ERROR:", error);
+  } else {
+    console.log("SMTP VERIFIED");
+  }
+});
 // ─── Shared Design Tokens ───
 const BRAND = {
   primary: '#4f46e5',
