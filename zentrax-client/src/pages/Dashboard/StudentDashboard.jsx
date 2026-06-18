@@ -239,8 +239,9 @@ const StudentDashboard = () => {
 
                     {/* Mentor Requests */}
                     <div className="zen-card">
-                        <div className="p-4" style={{ borderBottom: '1px solid var(--color-zen-border)' }}>
+                        <div className="p-4 flex items-center justify-between" style={{ borderBottom: '1px solid var(--color-zen-border)' }}>
                             <h2 className="text-sm font-semibold text-slate-900">Mentor Requests</h2>
+                            <Link to="/request-mentor" className="text-xs font-semibold hover:underline" style={{ color: '#4F46E5' }}>Find a mentor</Link>
                         </div>
                         <div className="p-2">
                             {mentorRequests.length === 0 ? (
