@@ -89,17 +89,54 @@ exports.submitDoubt = async (req, res) => {
 exports.getDoubts = async (req, res) => {
     try {
         const { status, limit: queryLimit } = req.query;
+        const userId = req.user.uid;
+
+        // Fetch requester's role
+        const userDoc = await db.collection('users').doc(userId).get();
+        const userRole = userDoc.exists ? userDoc.data().role : null;
 
         let query = db.collection('doubts');
-
         if (status) query = query.where('status', '==', status);
 
         const snapshot = await query.get();
         const doubts = [];
 
-        snapshot.forEach(doc => {
-            doubts.push({ id: doc.id, ...doc.data() });
-        });
+        if (userRole === 'mentor') {
+            // Mentor: Filter doubts to only show those belonging to projects they guide/are members of
+            const projSnap = await db.collection('projects').get();
+            const assignedProjectIds = [];
+            projSnap.forEach(doc => {
+                const d = doc.data();
+                const isMentor = d.mentorId === userId || d.members?.includes(userId);
+                if (isMentor) {
+                    assignedProjectIds.push(doc.id);
+                }
+            });
+
+            if (assignedProjectIds.length === 0) {
+                return res.status(200).json({ success: true, data: { doubts: [] } });
+            }
+
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                if (d.projectId && assignedProjectIds.includes(d.projectId)) {
+                    doubts.push({ id: doc.id, ...d });
+                }
+            });
+        } else if (userRole === 'student') {
+            // Student fallback: only show their own doubts (though they usually use /my-doubts)
+            snapshot.forEach(doc => {
+                const d = doc.data();
+                if (d.studentId === userId) {
+                    doubts.push({ id: doc.id, ...d });
+                }
+            });
+        } else {
+            // Admin or other: show all doubts
+            snapshot.forEach(doc => {
+                doubts.push({ id: doc.id, ...doc.data() });
+            });
+        }
 
         doubts.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
 
