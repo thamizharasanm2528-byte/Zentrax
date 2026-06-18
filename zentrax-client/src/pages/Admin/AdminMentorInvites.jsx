@@ -21,6 +21,7 @@ const AdminMentorInvites = () => {
     const [confirmRevoke, setConfirmRevoke] = useState(null);
     const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
     const [clearingHistory, setClearingHistory] = useState(false);
+    const [showClearHistoryModal, setShowClearHistoryModal] = useState(false);
 
     const getHeaders = useCallback(async () => {
         const token = await auth.currentUser?.getIdToken();
@@ -92,7 +93,6 @@ const AdminMentorInvites = () => {
     };
 
     const handleClearHistory = async () => {
-        if (!window.confirm("Are you sure you want to clear all used and expired invite codes?")) return;
         setClearingHistory(true);
         try {
             const headers = await getHeaders();
@@ -180,6 +180,29 @@ const AdminMentorInvites = () => {
                 </div>
             )}
 
+            {/* Clear history confirm modal */}
+            {showClearHistoryModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+                    <div className="zen-card p-6 w-full max-w-sm">
+                        <h3 className="text-base font-semibold text-slate-900 mb-2">
+                            Clear Invite History
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-6">
+                            Are you sure you want to clear all used and expired invite codes? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setShowClearHistoryModal(false)} className="zen-btn-secondary text-sm">Cancel</button>
+                            <button onClick={() => {
+                                setShowClearHistoryModal(false);
+                                handleClearHistory();
+                            }} className="zen-btn-danger text-sm">
+                                Clear History
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Create Invite Modal */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
@@ -229,13 +252,6 @@ const AdminMentorInvites = () => {
                     <p className="text-sm text-slate-500 mt-0.5">Generate and manage mentor registration invite codes</p>
                 </div>
                 <div className="flex gap-2">
-                    {activeTab === 'history' && (usedCount > 0 || expiredCount > 0) && (
-                        <button onClick={handleClearHistory} disabled={clearingHistory} className="zen-btn-danger text-sm flex items-center gap-1.5"
-                            style={{ background: '#EF4444', color: '#FFFFFF' }}>
-                            {clearingHistory ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            Clear History
-                        </button>
-                    )}
                     <button onClick={fetchInvites} className="zen-btn-secondary text-sm flex items-center gap-1.5">
                         <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </button>
@@ -312,66 +328,77 @@ const AdminMentorInvites = () => {
                 }
 
                 return (
-                    <div className="zen-card overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm">
-                                <thead>
-                                    <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Code</th>
-                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mentor</th>
-                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Created</th>
-                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Expires</th>
-                                        <th className="text-right px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredInvites.map(inv => (
-                                        <tr key={inv.code} className="hover:bg-slate-50/50 transition-colors"
-                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
-                                            <td className="px-4 py-3">
-                                                <div className="flex items-center gap-2">
-                                                    <code className="bg-slate-100 px-2 py-1 rounded-md font-mono text-xs font-bold text-slate-800 tracking-wider">{inv.code}</code>
-                                                    <button onClick={() => copyCode(inv.code)} title="Copy code"
-                                                        className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors">
-                                                        {copiedCode === inv.code ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                                                    </button>
-                                                </div>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                <p className="text-sm font-medium text-slate-900">{inv.name}</p>
-                                                <p className="text-xs text-slate-500">{inv.email}</p>
-                                            </td>
-                                            <td className="px-4 py-3">
-                                                {getStatusBadge(inv.status)}
-                                            </td>
-                                            <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.createdAt)}</td>
-                                            <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.expiresAt)}</td>
-                                            <td className="px-4 py-3">
-                                                <div className="flex justify-end gap-1">
-                                                    {inv.status === 'active' ? (
-                                                        <>
-                                                            <button onClick={() => copyCode(inv.code)} title="Copy code"
-                                                                className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md transition-colors">
-                                                                <Copy className="h-3.5 w-3.5" />
-                                                            </button>
-                                                            <button onClick={() => setConfirmRevoke(inv)} title="Revoke"
+                    <div className="space-y-4">
+                        {activeTab === 'history' && (
+                            <div className="flex justify-end">
+                                <button onClick={() => setShowClearHistoryModal(true)} disabled={clearingHistory} className="zen-btn-danger text-sm flex items-center gap-1.5"
+                                    style={{ background: '#EF4444', color: '#FFFFFF' }}>
+                                    {clearingHistory ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                    Clear History
+                                </button>
+                            </div>
+                        )}
+                        <div className="zen-card overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full text-sm">
+                                    <thead>
+                                        <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                                            <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Code</th>
+                                            <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mentor</th>
+                                            <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                            <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Created</th>
+                                            <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Expires</th>
+                                            <th className="text-right px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {filteredInvites.map(inv => (
+                                            <tr key={inv.code} className="hover:bg-slate-50/50 transition-colors"
+                                                style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <code className="bg-slate-100 px-2 py-1 rounded-md font-mono text-xs font-bold text-slate-800 tracking-wider">{inv.code}</code>
+                                                        <button onClick={() => copyCode(inv.code)} title="Copy code"
+                                                            className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors">
+                                                            {copiedCode === inv.code ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    <p className="text-sm font-medium text-slate-900">{inv.name}</p>
+                                                    <p className="text-xs text-slate-500">{inv.email}</p>
+                                                </td>
+                                                <td className="px-4 py-3">
+                                                    {getStatusBadge(inv.status)}
+                                                </td>
+                                                <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.createdAt)}</td>
+                                                <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.expiresAt)}</td>
+                                                <td className="px-4 py-3">
+                                                    <div className="flex justify-end gap-1">
+                                                        {inv.status === 'active' ? (
+                                                            <>
+                                                                <button onClick={() => copyCode(inv.code)} title="Copy code"
+                                                                    className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md transition-colors">
+                                                                    <Copy className="h-3.5 w-3.5" />
+                                                                </button>
+                                                                <button onClick={() => setConfirmRevoke(inv)} title="Revoke"
+                                                                    className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors">
+                                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                                </button>
+                                                            </>
+                                                        ) : (
+                                                            <button onClick={() => setConfirmRevoke(inv)} title="Delete Log"
                                                                 className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors">
                                                                 <Trash2 className="h-3.5 w-3.5" />
                                                             </button>
-                                                        </>
-                                                    ) : (
-                                                        <button onClick={() => setConfirmRevoke(inv)} title="Delete Log"
-                                                            className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors">
-                                                            <Trash2 className="h-3.5 w-3.5" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 );
