@@ -21,6 +21,7 @@ const AdminMentorInvites = () => {
     const [confirmRevoke, setConfirmRevoke] = useState(null);
     const [activeTab, setActiveTab] = useState('active'); // 'active' | 'history'
     const [clearingHistory, setClearingHistory] = useState(false);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
 
     const getHeaders = useCallback(async () => {
         const token = await auth.currentUser?.getIdToken();
@@ -92,7 +93,6 @@ const AdminMentorInvites = () => {
     };
 
     const handleClearHistory = async () => {
-        if (!window.confirm("Are you sure you want to clear all used and expired invite codes?")) return;
         setClearingHistory(true);
         try {
             const headers = await getHeaders();
