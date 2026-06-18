@@ -115,7 +115,7 @@ router.get('/mentor-invites', verifyToken, checkAdminAccess, async (req, res) =>
     }
 });
 
-// DELETE /api/admin/mentor-invites/:code — Revoke an invite
+// DELETE /api/admin/mentor-invites/:code — Revoke or delete an invite
 router.delete('/mentor-invites/:code', verifyToken, checkAdminAccess, async (req, res) => {
     try {
         const { code } = req.params;
@@ -126,17 +126,45 @@ router.delete('/mentor-invites/:code', verifyToken, checkAdminAccess, async (req
             return res.status(404).json({ error: 'Invite not found.' });
         }
 
-        if (doc.data().used) {
-            return res.status(400).json({ error: 'Cannot revoke an already used invite.' });
+        await docRef.delete();
+        console.log(`[MentorInvite] 🗑️ Deleted invite | code=${code} | by=${req.user.email}`);
+
+        res.status(200).json({ success: true, message: 'Invite deleted successfully.' });
+    } catch (error) {
+        console.error('[MentorInvite] Failed to delete invite:', error.message);
+        res.status(500).json({ error: 'Failed to delete invite.' });
+    }
+});
+
+// POST /api/admin/mentor-invites/clear-history — Delete all used and expired invites (clear logs)
+router.post('/mentor-invites/clear-history', verifyToken, checkAdminAccess, async (req, res) => {
+    try {
+        const now = new Date();
+        const snapshot = await db.collection(INVITES_COLLECTION).get();
+        
+        const batch = db.batch();
+        let count = 0;
+
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            const isUsed = data.used === true;
+            const isExpired = new Date(data.expiresAt) < now;
+
+            if (isUsed || isExpired) {
+                batch.delete(doc.ref);
+                count++;
+            }
+        });
+
+        if (count > 0) {
+            await batch.commit();
         }
 
-        await docRef.delete();
-        console.log(`[MentorInvite] 🗑️ Revoked invite | code=${code} | by=${req.user.email}`);
-
-        res.status(200).json({ success: true, message: 'Invite revoked.' });
+        console.log(`[MentorInvite] 🗑️ Cleared history of ${count} invites by ${req.user.email}`);
+        res.status(200).json({ success: true, message: `Cleared history of ${count} invites.` });
     } catch (error) {
-        console.error('[MentorInvite] Failed to revoke invite:', error.message);
-        res.status(500).json({ error: 'Failed to revoke invite.' });
+        console.error('[MentorInvite] Failed to clear history:', error.message);
+        res.status(500).json({ error: 'Failed to clear invite history.' });
     }
 });
 
