@@ -1,58 +1,64 @@
+console.log("[Email] emailService.js loaded");
 const nodemailer = require('nodemailer');
 
 // Clean credentials in process.env to remove any enclosing double/single quotes from hosting panels
 if (process.env.EMAIL_USER) {
-    let user = process.env.EMAIL_USER.trim();
-    if (user.startsWith('"') && user.endsWith('"')) user = user.slice(1, -1);
-    else if (user.startsWith("'") && user.endsWith("'")) user = user.slice(1, -1);
-    process.env.EMAIL_USER = user;
+  let user = process.env.EMAIL_USER.trim();
+  if (user.startsWith('"') && user.endsWith('"')) user = user.slice(1, -1);
+  else if (user.startsWith("'") && user.endsWith("'")) user = user.slice(1, -1);
+  process.env.EMAIL_USER = user;
 }
 if (process.env.EMAIL_PASS) {
-    let pass = process.env.EMAIL_PASS.trim();
-    if (pass.startsWith('"') && pass.endsWith('"')) pass = pass.slice(1, -1);
-    else if (pass.startsWith("'") && pass.endsWith("'")) pass = pass.slice(1, -1);
-    process.env.EMAIL_PASS = pass;
+  let pass = process.env.EMAIL_PASS.trim();
+  if (pass.startsWith('"') && pass.endsWith('"')) pass = pass.slice(1, -1);
+  else if (pass.startsWith("'") && pass.endsWith("'")) pass = pass.slice(1, -1);
+  process.env.EMAIL_PASS = pass;
 }
 
 // ─── Configure transporter using Gmail SMTP ───
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // Use STARTTLS
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  family: 4, // Force IPv4
+  tls: {
+    rejectUnauthorized: false
+  }
 });
-
 // ─── Startup diagnostic: verify email credentials ───
 if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-    transporter.verify()
-        .then(() => console.log('[Email] ✅ SMTP connection verified — email service is ready'))
-        .catch(err => console.error('[Email] ❌ SMTP verification FAILED:', err.message));
+  transporter.verify()
+    .then(() => console.log('[Email] ✅ SMTP connection verified — email service is ready'))
+    .catch(err => console.error('[Email] ❌ SMTP verification FAILED:', err.message));
 } else {
-    console.warn('[Email] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
+  console.warn('[Email] ⚠️  EMAIL_USER or EMAIL_PASS not set — emails will be skipped');
 }
 
 // ─── Shared Design Tokens ───
 const BRAND = {
-    primary: '#4f46e5',
-    primaryDark: '#3730a3',
-    primaryLight: '#e0e7ff',
-    accent: '#06b6d4',
-    success: '#059669',
-    successBg: '#ecfdf5',
-    warning: '#d97706',
-    warningBg: '#fffbeb',
-    danger: '#dc2626',
-    dark: '#0f172a',
-    text: '#1e293b',
-    textSecondary: '#475569',
-    textMuted: '#94a3b8',
-    border: '#e2e8f0',
-    bgBody: '#f1f5f9',
-    bgCard: '#ffffff',
-    bgSubtle: '#f8fafc',
-    fontStack: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-    year: new Date().getFullYear()
+  primary: '#4f46e5',
+  primaryDark: '#3730a3',
+  primaryLight: '#e0e7ff',
+  accent: '#06b6d4',
+  success: '#059669',
+  successBg: '#ecfdf5',
+  warning: '#d97706',
+  warningBg: '#fffbeb',
+  danger: '#dc2626',
+  dark: '#0f172a',
+  text: '#1e293b',
+  textSecondary: '#475569',
+  textMuted: '#94a3b8',
+  border: '#e2e8f0',
+  bgBody: '#f1f5f9',
+  bgCard: '#ffffff',
+  bgSubtle: '#f8fafc',
+  fontStack: "'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
+  year: new Date().getFullYear()
 };
 
 /**
@@ -60,7 +66,7 @@ const BRAND = {
  * Content is injected into the body area.
  */
 function buildEmailShell({ subtitle = 'Notification', bodyHtml }) {
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -135,7 +141,7 @@ function buildEmailShell({ subtitle = 'Notification', bodyHtml }) {
  * Build a CTA button block.
  */
 function buildCTA(label, link, color = BRAND.primary) {
-    return `
+  return `
       <table cellpadding="0" cellspacing="0" border="0" align="center" style="margin-top:32px;">
         <tr>
           <td style="background-color:${color}; border-radius:10px; box-shadow: 0 4px 14px rgba(79,70,229,0.25);">
@@ -151,8 +157,8 @@ function buildCTA(label, link, color = BRAND.primary) {
  * Build a detail row for info cards.
  */
 function buildDetailRow(label, value) {
-    if (!value || value === 'N/A') return '';
-    return `
+  if (!value || value === 'N/A') return '';
+  return `
       <tr>
         <td style="padding:10px 0; color:${BRAND.textMuted}; font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; width:130px; vertical-align:top; font-family:${BRAND.fontStack};">${label}</td>
         <td style="padding:10px 0; color:${BRAND.text}; font-size:14px; font-weight:500; line-height:1.5; font-family:${BRAND.fontStack};">${value}</td>
@@ -177,19 +183,19 @@ function buildDetailRow(label, value) {
  * @returns {Promise<boolean>}          — true on success, false on failure (never throws)
  */
 async function sendMentorNotificationEmail({ mentorEmail, mentorName, studentName, projectName, requestType, message }) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping email');
-        return false;
-    }
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping email');
+    return false;
+  }
 
-    if (!mentorEmail) {
-        console.warn('[Email] No recipient email provided — skipping');
-        return false;
-    }
+  if (!mentorEmail) {
+    console.warn('[Email] No recipient email provided — skipping');
+    return false;
+  }
 
-    const subject = `${requestType} — ZENTRAX Platform`;
+  const subject = `${requestType} — ZENTRAX Platform`;
 
-    const bodyHtml = `
+  const bodyHtml = `
               <p style="margin:0 0 20px; color:${BRAND.text}; font-size:16px; line-height:1.6; font-family:${BRAND.fontStack};">
                 Dear <strong>${mentorName || 'User'}</strong>,
               </p>
@@ -227,21 +233,21 @@ async function sendMentorNotificationEmail({ mentorEmail, mentorName, studentNam
               ${buildCTA('Open Dashboard', 'http://localhost:5173')}
     `;
 
-    const html = buildEmailShell({ subtitle: requestType, bodyHtml });
+  const html = buildEmailShell({ subtitle: requestType, bodyHtml });
 
-    try {
-        await transporter.sendMail({
-            from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
-            to: mentorEmail,
-            subject,
-            html
-        });
-        console.log(`[Email] Notification sent to ${mentorEmail} (${requestType})`);
-        return true;
-    } catch (error) {
-        console.error(`[Email] Failed to send notification: ${error.message}`);
-        return false;
-    }
+  try {
+    await transporter.sendMail({
+      from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
+      to: mentorEmail,
+      subject,
+      html
+    });
+    console.log(`[Email] Notification sent to ${mentorEmail} (${requestType})`);
+    return true;
+  } catch (error) {
+    console.error(`[Email] Failed to send notification: ${error.message}`);
+    return false;
+  }
 }
 
 
@@ -259,37 +265,37 @@ async function sendMentorNotificationEmail({ mentorEmail, mentorName, studentNam
  * @returns {Promise<boolean>}        — true on success, false on failure (never throws)
  */
 async function sendWelcomeEmail({ userEmail, userName, role }) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping welcome email');
-        return false;
-    }
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping welcome email');
+    return false;
+  }
 
-    if (!userEmail) {
-        console.warn('[Email] No user email provided — skipping welcome email');
-        return false;
-    }
+  if (!userEmail) {
+    console.warn('[Email] No user email provided — skipping welcome email');
+    return false;
+  }
 
-    const isStudent = role !== 'mentor';
-    const displayRole = isStudent ? 'Student' : 'Mentor';
-    const badgeBg = isStudent ? BRAND.successBg : '#f3e8ff';
-    const badgeColor = isStudent ? BRAND.success : '#7c3aed';
-    const badgeBorder = isStudent ? '#a7f3d0' : '#d8b4fe';
+  const isStudent = role !== 'mentor';
+  const displayRole = isStudent ? 'Student' : 'Mentor';
+  const badgeBg = isStudent ? BRAND.successBg : '#f3e8ff';
+  const badgeColor = isStudent ? BRAND.success : '#7c3aed';
+  const badgeBorder = isStudent ? '#a7f3d0' : '#d8b4fe';
 
-    const features = isStudent
-        ? [
-            { icon: '🚀', title: 'Project Management', desc: 'Create, manage, and track your academic projects from start to finish.' },
-            { icon: '👥', title: 'Team Collaboration', desc: 'Find and join project teams with AI-powered skill matching.' },
-            { icon: '🎓', title: 'Mentorship Access', desc: 'Connect with experienced mentors for expert guidance and feedback.' },
-            { icon: '🤖', title: 'AI Assistant', desc: 'Get instant technical support powered by ZENTRAX-AI.' },
-        ]
-        : [
-            { icon: '🧭', title: 'Student Guidance', desc: 'Guide and support students through their project development journey.' },
-            { icon: '💬', title: 'Doubt Resolution', desc: 'Review and respond to student questions and technical challenges.' },
-            { icon: '📋', title: 'Project Oversight', desc: 'Monitor project progress and provide timely, constructive feedback.' },
-            { icon: '🤝', title: 'Live Sessions', desc: 'Conduct mentorship sessions to provide real-time guidance.' },
-        ];
+  const features = isStudent
+    ? [
+      { icon: '🚀', title: 'Project Management', desc: 'Create, manage, and track your academic projects from start to finish.' },
+      { icon: '👥', title: 'Team Collaboration', desc: 'Find and join project teams with AI-powered skill matching.' },
+      { icon: '🎓', title: 'Mentorship Access', desc: 'Connect with experienced mentors for expert guidance and feedback.' },
+      { icon: '🤖', title: 'AI Assistant', desc: 'Get instant technical support powered by ZENTRAX-AI.' },
+    ]
+    : [
+      { icon: '🧭', title: 'Student Guidance', desc: 'Guide and support students through their project development journey.' },
+      { icon: '💬', title: 'Doubt Resolution', desc: 'Review and respond to student questions and technical challenges.' },
+      { icon: '📋', title: 'Project Oversight', desc: 'Monitor project progress and provide timely, constructive feedback.' },
+      { icon: '🤝', title: 'Live Sessions', desc: 'Conduct mentorship sessions to provide real-time guidance.' },
+    ];
 
-    const featureHtml = features.map(f => `
+  const featureHtml = features.map(f => `
       <tr>
         <td style="padding:16px 20px; border-bottom:1px solid ${BRAND.border};">
           <table cellpadding="0" cellspacing="0" border="0" width="100%">
@@ -306,9 +312,9 @@ async function sendWelcomeEmail({ userEmail, userName, role }) {
         </td>
       </tr>`).join('');
 
-    const subject = `Welcome to ZENTRAX — Your Account is Ready`;
+  const subject = `Welcome to ZENTRAX — Your Account is Ready`;
 
-    const bodyHtml = `
+  const bodyHtml = `
               <p style="margin:0 0 20px; color:${BRAND.text}; font-size:16px; line-height:1.6; font-family:${BRAND.fontStack};">
                 Dear <strong>${userName || 'User'}</strong>,
               </p>
@@ -349,21 +355,21 @@ async function sendWelcomeEmail({ userEmail, userName, role }) {
               </p>
     `;
 
-    const html = buildEmailShell({ subtitle: 'Welcome', bodyHtml });
+  const html = buildEmailShell({ subtitle: 'Welcome', bodyHtml });
 
-    try {
-        await transporter.sendMail({
-            from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
-            to: userEmail,
-            subject,
-            html
-        });
-        console.log(`[Email] Welcome email sent to ${userEmail} (${displayRole})`);
-        return true;
-    } catch (error) {
-        console.error(`[Email] Failed to send welcome email to ${userEmail}: ${error.message}`);
-        return false;
-    }
+  try {
+    await transporter.sendMail({
+      from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject,
+      html
+    });
+    console.log(`[Email] Welcome email sent to ${userEmail} (${displayRole})`);
+    return true;
+  } catch (error) {
+    console.error(`[Email] Failed to send welcome email to ${userEmail}: ${error.message}`);
+    return false;
+  }
 }
 
 
@@ -385,10 +391,10 @@ async function sendWelcomeEmail({ userEmail, userName, role }) {
  * @returns {Promise<boolean>}             — true on success (never throws)
  */
 async function sendNotificationEmail({ recipientEmail, recipientName, subject, title, message, ctaLink = 'http://localhost:5173', ctaLabel = 'Open Dashboard' }) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false;
-    if (!recipientEmail) return false;
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) return false;
+  if (!recipientEmail) return false;
 
-    const bodyHtml = `
+  const bodyHtml = `
               <p style="margin:0 0 20px; color:${BRAND.text}; font-size:16px; line-height:1.6; font-family:${BRAND.fontStack};">
                 Dear <strong>${recipientName || 'User'}</strong>,
               </p>
@@ -413,21 +419,21 @@ async function sendNotificationEmail({ recipientEmail, recipientName, subject, t
               ${buildCTA(ctaLabel, ctaLink)}
     `;
 
-    const html = buildEmailShell({ subtitle: title, bodyHtml });
+  const html = buildEmailShell({ subtitle: title, bodyHtml });
 
-    try {
-        await transporter.sendMail({
-            from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
-            to: recipientEmail,
-            subject,
-            html
-        });
-        console.log(`[Email] Notification sent to ${recipientEmail}: ${subject}`);
-        return true;
-    } catch (error) {
-        console.error(`[Email] Failed to send notification: ${error.message}`);
-        return false;
-    }
+  try {
+    await transporter.sendMail({
+      from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
+      to: recipientEmail,
+      subject,
+      html
+    });
+    console.log(`[Email] Notification sent to ${recipientEmail}: ${subject}`);
+    return true;
+  } catch (error) {
+    console.error(`[Email] Failed to send notification: ${error.message}`);
+    return false;
+  }
 }
 
 /**
@@ -440,20 +446,20 @@ async function sendNotificationEmail({ recipientEmail, recipientName, subject, t
  * @returns {Promise<boolean>}    — true on success, false on failure (never throws)
  */
 async function sendMentorInviteEmail({ email, name, code }) {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-        console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping invite email');
-        return false;
-    }
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.warn('[Email] EMAIL_USER or EMAIL_PASS not set — skipping invite email');
+    return false;
+  }
 
-    if (!email) {
-        console.warn('[Email] No email provided — skipping invite email');
-        return false;
-    }
+  if (!email) {
+    console.warn('[Email] No email provided — skipping invite email');
+    return false;
+  }
 
-    const signupLink = `https://zentraxplatform.netlify.app/signup?role=mentor&code=${code}&email=${encodeURIComponent(email)}`;
-    const subject = `Invitation to join ZENTRAX as a Mentor`;
+  const signupLink = `https://zentraxplatform.netlify.app/signup?role=mentor&code=${code}&email=${encodeURIComponent(email)}`;
+  const subject = `Invitation to join ZENTRAX as a Mentor`;
 
-    const bodyHtml = `
+  const bodyHtml = `
               <p style="margin:0 0 20px; color:${BRAND.text}; font-size:16px; line-height:1.6; font-family:${BRAND.fontStack};">
                 Dear <strong>${name || 'Mentor'}</strong>,
               </p>
@@ -491,21 +497,21 @@ async function sendMentorInviteEmail({ email, name, code }) {
               </p>
     `;
 
-    const html = buildEmailShell({ subtitle: 'Invitation', bodyHtml });
+  const html = buildEmailShell({ subtitle: 'Invitation', bodyHtml });
 
-    try {
-        await transporter.sendMail({
-            from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
-            to: email,
-            subject,
-            html
-        });
-        console.log(`[Email] Invite email sent to ${email} with code ${code}`);
-        return true;
-    } catch (error) {
-        console.error(`[Email] Failed to send invite email to ${email}: ${error.message}`);
-        return false;
-    }
+  try {
+    await transporter.sendMail({
+      from: `"ZENTRAX" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject,
+      html
+    });
+    console.log(`[Email] Invite email sent to ${email} with code ${code}`);
+    return true;
+  } catch (error) {
+    console.error(`[Email] Failed to send invite email to ${email}: ${error.message}`);
+    return false;
+  }
 }
 
 module.exports = { sendMentorNotificationEmail, sendWelcomeEmail, sendNotificationEmail, sendMentorInviteEmail };
