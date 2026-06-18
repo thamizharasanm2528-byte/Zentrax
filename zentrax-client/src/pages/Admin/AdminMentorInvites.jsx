@@ -289,77 +289,93 @@ const AdminMentorInvites = () => {
                 <div className="flex justify-center py-32">
                     <Loader2 className="h-6 w-6 animate-spin" style={{ color: '#8B5CF6' }} />
                 </div>
-            ) : invites.length === 0 ? (
-                <div className="zen-card zen-empty py-16">
-                    <KeyRound className="h-8 w-8 zen-empty-icon" />
-                    <p className="zen-empty-title">No invites yet</p>
-                    <p className="zen-empty-desc">Click "New Invite" to generate a mentor registration code.</p>
-                </div>
-            ) : (
-                <div className="zen-card overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm">
-                            <thead>
-                                <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
-                                    <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Code</th>
-                                    <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mentor</th>
-                                    <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Created</th>
-                                    <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Expires</th>
-                                    <th className="text-right px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {invites.map(inv => (
-                                    <tr key={inv.code} className="hover:bg-slate-50/50 transition-colors"
-                                        style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
-                                        <td className="px-4 py-3">
-                                            <div className="flex items-center gap-2">
-                                                <code className="bg-slate-100 px-2 py-1 rounded-md font-mono text-xs font-bold text-slate-800 tracking-wider">{inv.code}</code>
-                                                <button onClick={() => copyCode(inv.code)} title="Copy code"
-                                                    className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors">
-                                                    {copiedCode === inv.code ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            <p className="text-sm font-medium text-slate-900">{inv.name}</p>
-                                            <p className="text-xs text-slate-500">{inv.email}</p>
-                                        </td>
-                                        <td className="px-4 py-3">
-                                            {getStatusBadge(inv.status)}
-                                        </td>
-                                        <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.createdAt)}</td>
-                                        <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.expiresAt)}</td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex justify-end gap-1">
-                                                {inv.status === 'active' && (
-                                                    <>
-                                                        <button onClick={() => copyCode(inv.code)} title="Copy code"
-                                                            className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md transition-colors">
-                                                            <Copy className="h-3.5 w-3.5" />
-                                                        </button>
-                                                        <button onClick={() => setConfirmRevoke(inv)} title="Revoke"
+            ) : (() => {
+                const filteredInvites = invites.filter(inv => {
+                    if (activeTab === 'active') return inv.status === 'active';
+                    return inv.status === 'used' || inv.status === 'expired';
+                });
+
+                if (filteredInvites.length === 0) {
+                    return (
+                        <div className="zen-card zen-empty py-16">
+                            <KeyRound className="h-8 w-8 zen-empty-icon" />
+                            <p className="zen-empty-title">
+                                {activeTab === 'active' ? 'No active invites' : 'No invite history'}
+                            </p>
+                            <p className="zen-empty-desc">
+                                {activeTab === 'active' 
+                                    ? 'Click "New Invite" to generate a mentor registration code.' 
+                                    : 'Used and expired invite codes will appear here.'}
+                            </p>
+                        </div>
+                    );
+                }
+
+                return (
+                    <div className="zen-card overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-sm">
+                                <thead>
+                                    <tr style={{ borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Code</th>
+                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Mentor</th>
+                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</th>
+                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Created</th>
+                                        <th className="text-left px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Expires</th>
+                                        <th className="text-right px-4 py-3 text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredInvites.map(inv => (
+                                        <tr key={inv.code} className="hover:bg-slate-50/50 transition-colors"
+                                            style={{ borderBottom: '1px solid rgba(0,0,0,0.03)' }}>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-2">
+                                                    <code className="bg-slate-100 px-2 py-1 rounded-md font-mono text-xs font-bold text-slate-800 tracking-wider">{inv.code}</code>
+                                                    <button onClick={() => copyCode(inv.code)} title="Copy code"
+                                                        className="p-1 text-slate-400 hover:text-slate-700 rounded transition-colors">
+                                                        {copiedCode === inv.code ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <p className="text-sm font-medium text-slate-900">{inv.name}</p>
+                                                <p className="text-xs text-slate-500">{inv.email}</p>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                {getStatusBadge(inv.status)}
+                                            </td>
+                                            <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.createdAt)}</td>
+                                            <td className="px-4 py-3 text-xs text-slate-500">{formatDate(inv.expiresAt)}</td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex justify-end gap-1">
+                                                    {inv.status === 'active' ? (
+                                                        <>
+                                                            <button onClick={() => copyCode(inv.code)} title="Copy code"
+                                                                className="p-1.5 text-slate-500 hover:text-blue-600 rounded-md transition-colors">
+                                                                <Copy className="h-3.5 w-3.5" />
+                                                            </button>
+                                                            <button onClick={() => setConfirmRevoke(inv)} title="Revoke"
+                                                                className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors">
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <button onClick={() => setConfirmRevoke(inv)} title="Delete Log"
                                                             className="p-1.5 text-slate-500 hover:text-red-600 rounded-md transition-colors">
                                                             <Trash2 className="h-3.5 w-3.5" />
                                                         </button>
-                                                    </>
-                                                )}
-                                                {inv.status === 'used' && (
-                                                    <span className="text-[10px] text-slate-400 px-2">Registered</span>
-                                                )}
-                                                {inv.status === 'expired' && (
-                                                    <span className="text-[10px] text-slate-400 px-2">Expired</span>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                </div>
-            )}
+                );
+            })()}
 
             {/* Info card */}
             <div className="zen-card p-4" style={{ borderLeft: '3px solid #8B5CF6' }}>
