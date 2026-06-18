@@ -180,6 +180,30 @@ const AdminMentorInvites = () => {
                 </div>
             )}
 
+            {/* Clear history confirm modal */}
+            {showClearConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
+                    <div className="zen-card p-6 w-full max-w-sm">
+                        <h3 className="text-base font-semibold text-slate-900 mb-2">
+                            Clear Invite History
+                        </h3>
+                        <p className="text-sm text-slate-500 mb-6">
+                            Are you sure you want to clear all used and expired invite codes? This action cannot be undone.
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button onClick={() => setShowClearConfirm(false)} className="zen-btn-secondary text-sm">Cancel</button>
+                            <button onClick={async () => {
+                                setShowClearConfirm(false);
+                                await handleClearHistory();
+                            }} disabled={clearingHistory} className="zen-btn-danger text-sm flex items-center gap-1.5">
+                                {clearingHistory ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
+                                Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Create Invite Modal */}
             {showCreate && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
@@ -229,13 +253,6 @@ const AdminMentorInvites = () => {
                     <p className="text-sm text-slate-500 mt-0.5">Generate and manage mentor registration invite codes</p>
                 </div>
                 <div className="flex gap-2">
-                    {activeTab === 'history' && (usedCount > 0 || expiredCount > 0) && (
-                        <button onClick={handleClearHistory} disabled={clearingHistory} className="zen-btn-danger text-sm flex items-center gap-1.5"
-                            style={{ background: '#EF4444', color: '#FFFFFF' }}>
-                            {clearingHistory ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Trash2 className="h-3.5 w-3.5" />}
-                            Clear History
-                        </button>
-                    )}
                     <button onClick={fetchInvites} className="zen-btn-secondary text-sm flex items-center gap-1.5">
                         <RefreshCw className="h-3.5 w-3.5" /> Refresh
                     </button>
