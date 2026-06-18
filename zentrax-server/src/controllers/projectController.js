@@ -269,9 +269,48 @@ exports.removeMember = async (req, res) => {
         }
 
         const { FieldValue } = require('firebase-admin/firestore');
-        await db.collection('projects').doc(id).update({
+        const updateData = {
             members: FieldValue.arrayRemove(memberId)
-        });
+        };
+
+        // If the removed member was the mentor, clear mentorId from project
+        if (project.mentorId === memberId) {
+            updateData.mentorId = null;
+        }
+
+        await db.collection('projects').doc(id).update(updateData);
+
+        // If the removed member was the mentor, update corresponding request statuses to 'cancelled'
+        if (project.mentorId === memberId) {
+            try {
+                const batch = db.batch();
+
+                // 1. Update mentorship_requests collection
+                const mentorshipSnap = await db.collection('mentorship_requests')
+                    .where('project_id', '==', id)
+                    .where('mentor_id', '==', memberId)
+                    .where('status', '==', 'accepted')
+                    .get();
+                mentorshipSnap.forEach(doc => {
+                    batch.update(doc.ref, { status: 'cancelled', cancelled_at: new Date().toISOString() });
+                });
+
+                // 2. Update mentor_requests collection
+                const mentorSnap = await db.collection('mentor_requests')
+                    .where('projectId', '==', id)
+                    .where('mentor_id', '==', memberId)
+                    .where('status', '==', 'accepted')
+                    .get();
+                mentorSnap.forEach(doc => {
+                    batch.update(doc.ref, { status: 'cancelled', cancelled_at: new Date().toISOString() });
+                });
+
+                await batch.commit();
+                console.log(`[Projects] Cancelled mentorship requests for project ${id} and mentor ${memberId}`);
+            } catch (err) {
+                console.error('[Projects] Failed to update mentorship requests:', err.message);
+            }
+        }
 
         // Notify removed member
         await db.collection('notifications').add({
